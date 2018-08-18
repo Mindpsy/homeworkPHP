@@ -32,16 +32,15 @@ $about = 'FULL стэк разработчик';
         </dl>
         <hr>
         <p>Дополнительное задание</p>
-<?php
-        //доп задание 
-$userData = $_GET['x'];
-$number1 = 1;
-$number2 = 1;
-$value3;
-?>
+
         <p>Число пользователя: <?php echo "$userData";?> </p>
         <p>
             <?php 
+            //доп задание 
+            $userData = $_GET['x'];
+            $number1 = 1;
+            $number2 = 1;
+            $value3;
                 if ($number1 > $userData) {
                     echo "<p>Задуманное число НЕ входит в часловой ряд</p>";  
                 } else {
@@ -50,8 +49,8 @@ $value3;
                     } else {
                         $value3 = $number1;
                         echo "$value3</br>";
-                        $value1 =+ $number2;
-                        echo "$value1</br>";
+                        $number1 += $number2;
+                        echo "$number1</br>";
                         $number2 = $value3;
                         echo "$number2</br>";
                     }
