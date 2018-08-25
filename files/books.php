@@ -3,17 +3,34 @@ function getApiBook ($queryUser)
 {
     $encodeQuery = urlencode($queryUser);
     $apiData = file_get_contents("https://www.googleapis.com/books/v1/volumes?q=$encodeQuery");
-    var_dump($apiData);
+    return json_decode($apiData);
 }
 
-function writeToCsv ($data, $destionation) {
-    $handle = fopen($destionation, "wb");
-    if($handle) {
-        fputcsv($handle, $data);
-        fclose($handle);
+function chekJsonData ($encodedJson)
+    {
+        $last_error = json_last_error();
+        if(json_last_error()) {
+            json_last_error_msg();
+        }
+        
     }
-}
 
-getApiBook($argv[1]);
+function writeInCsv ($destinationWrite, $massiveData) 
+    {
+        $handleWrite = fopen($destinationWrite, "wb"); 
+        if($handleWrite) {
+            foreach($massiveData as $name=>$value){
+                $row = [$value->id, $value->volumeInfo->title, implode($value->volumeInfo->    authors)];
+                fputcsv($handleWrite, $row);
+            }
+        }
+        fclose($handleWrite);
+    }
+
+$searchString = implode(array_slice($argv, 1));
+$apiObj = getApiBook($searchString);
+
+$urlFile = "./books.csv";
+writeInCsv($urlFile, $apiObj->items);
 
 ?>
