@@ -33,7 +33,7 @@ $about = 'FULL стэк разработчик';
         <hr>
         <p>Дополнительное задание</p>
 
-        <p>Число пользователя: <?php echo $_GET['x'];?> </p>
+        <p>Число пользователя: <?php if(isset($_GET['x'])) {echo $_GET['x'];}?> </p>
         <p>
             <?php 
             //доп задание 
@@ -45,18 +45,20 @@ $about = 'FULL стэк разработчик';
                 $number2 = 1;
                 $value3;
 
-                while ($number1 > $userData) {
-                    if ($number1 < $userData) {
-                        echo "<p>Задуманное число НЕ входит в часловой ряд</p>";
-                        die;
-                    } elseif ($number1 == $userData) {
-                        echo "Задуманное число входит в числовой ряд";
-                        die;
-                    } else {
+                if ($number1 > $userData) {
+                    echo "<p>Задуманное число НЕ входит в часловой ряд</p>";
+                } 
+                if ($number1 == $userData) {
+                    echo "Задуманное число входит в числовой ряд";
+                }
+
+                while ($userData > $number1) {
                         $value3 = $number1;
+                        echo "$value3</br>";
                         $number1 += $number2;
+                        echo "$number1</br>";
                         $number2 = $value3;
-                    }
+                        echo "$number2</br>";
                 }
             }   
             ?>
