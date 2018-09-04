@@ -28,7 +28,7 @@
             function getAndDecodeJson ($massive, $testNum) {
                 $url = $massive[$testNum][1];
                 $jsonObj = file_get_contents($url);
-                $obj = json_decode($jsonObj, true);
+                $obj = json_decode($jsonObj);
                 return $obj;
             }
 
@@ -38,24 +38,51 @@
                 $num = $_GET["numberTest"];
                 if (isset($massiveDest[$num-1])) { 
                     $testObj = getAndDecodeJson($massiveDest, $_GET["numberTest"]);?>
-                    <form action='' method='POST'>
+                    <form action='' method='post'>
                     <?php
                     if(isset($testObj)) {
-                    foreach ($testObj as $key => $value) { ?>
-                        <fieldset>
-                            <legend><?=$value->description; ?></legend>
-                            <label><input type="radio" name="q11"><?=$testObj->description; ?></label>
-                            <label><input type="radio" name="q12"><?=$testObj->description; ?></label>
-                            <label><input type="radio" name="q13"><?=$testObj->description; ?></label>
-                            <label><input type="radio" name="q14"><?=$testObj->description; ?></label>
-                        </fieldset>
-                    <?php }
+                        foreach ($testObj as $key => $value) { ?>
+                            <fieldset>
+                                <legend><?=$value->description; ?></legend>
+                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[0] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[1] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[2] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[3] ?></label>
+                            </fieldset>
+                        <?php
+                        }
                     }
                     ?>
-                        <input type='submit' value='Отправить'>
+                        <input type='submit' value='Отправить' name="check">
                     </form>
                 <?php
                 }
-            }?>
+            }
+            if(isset($_POST['check'])) {
+                $sumtest = count($testObj)-1;
+                $failedQustions = [];
+
+                foreach ($testObj as $key => $value) {
+                    if($sumtest == $key) {
+                        break;
+                    }
+                    if($value->correct != $POST[$key]) {
+                        $failedQustions[] = $key;
+                    }
+                }
+                
+                if(empty($failedQustions)) {
+                    echo "Поздравляем вы правильно ответили на все вопросы!";
+                } else {
+                    echo "Вы допустили ошибки в следующих вопросах";
+                    foreach($failedQustions as $keys => $values) {
+                        echo "$keys";
+                    }
+                }
+                var_dump($_POST);
+                
+
+            }
+            ?>
         </body>
     </html>
