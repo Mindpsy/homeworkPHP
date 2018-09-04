@@ -26,6 +26,7 @@ if(!empty($_FILES)) {
                 echo $_FILES['test']['tmp_name'];
                 writeTest($name, $dest);
                 echo "Тест успешно внесен в список</br> ";
+                header("Location: /list.php");
             }
         /* } else {
         echo "прикрепите файл json формата";
