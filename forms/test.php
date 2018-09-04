@@ -25,41 +25,37 @@
                 }
             }
 
-            function getAndDecodeJson ($massive, $questionNum) {
-                $url = $massive["$questionNum"][1];
-                $jsonObj = file_get_contetns($url);
-                $obj = json_decode($jsonObj);
+            function getAndDecodeJson ($massive, $testNum) {
+                $url = $massive[$testNum][1];
+                $jsonObj = file_get_contents($url);
+                $obj = json_decode($jsonObj, true);
                 return $obj;
             }
 
             $massiveDest = getMassiveFromCsv();
 
-            if ($_GET) {
-                var_dump($_GET);
+            if (isset($_GET["numberTest"])) {
                 $num = $_GET["numberTest"];
-                if ($massiveDest[$num]) {
-                    $testObj = getAndDecodeJson($massiveDest, $_GET["numberTest"]);
-                    echo "<form action='' method='POST'>";
-                    echo "<fieldset>";
-                    echo "<legend>Сколько граммов в одном килограмме?</legend>";
-                    echo "<label><input type='radio' name='q1'> 10</label>";
-                    echo "<label><input type='radio' name='q1'> 100</label>";
-                    echo "<label><input type='radio' name='q1'> 1000</label>";
-                    echo "<label><input type='radio' name='q1'> 10000</label>";
-                    echo "</fieldset>";
-                    echo "<fieldset>";
-                    echo "<legend>Сколько метров в одном дециметре?</legend>";
-                    echo "<label><input type='radio' name='q2'> 100</label>";
-                    echo "<label><input type='radio' name='q2'> 10</label>";
-                    echo "<label><input type='radio' name='q2'> 0.1</label>";
-                    echo "<label><input type='radio' name='q2'> 0.01</label>";
-                    echo "</fieldset>";
-                    echo "<input type='submit' value='Отправить'>";
-                    echo "</form>";
+                if (isset($massiveDest[$num-1])) { 
+                    $testObj = getAndDecodeJson($massiveDest, $_GET["numberTest"]);?>
+                    <form action='' method='POST'>
+                    <?php
+                    if(isset($testObj)) {
+                    foreach ($testObj as $key => $value) { ?>
+                        <fieldset>
+                            <legend><?=$value->description; ?></legend>
+                            <label><input type="radio" name="q11"><?=$testObj->description; ?></label>
+                            <label><input type="radio" name="q12"><?=$testObj->description; ?></label>
+                            <label><input type="radio" name="q13"><?=$testObj->description; ?></label>
+                            <label><input type="radio" name="q14"><?=$testObj->description; ?></label>
+                        </fieldset>
+                    <?php }
+                    }
+                    ?>
+                        <input type='submit' value='Отправить'>
+                    </form>
+                <?php
                 }
-            }
-
-
-            ?>
+            }?>
         </body>
     </html>
