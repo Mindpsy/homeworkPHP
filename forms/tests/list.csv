@@ -2,3 +2,4 @@ package-lock.json,./tests/package-lock.json
 .gitignore,./tests/.gitignore
 yarn.lock,./tests/yarn.lock
 index.js,./tests/index.js
+example.json,./tests/example.json

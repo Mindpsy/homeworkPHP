@@ -28,33 +28,35 @@
             function getAndDecodeJson ($massive, $testNum) {
                 $url = $massive[$testNum][1];
                 $jsonObj = file_get_contents($url);
-                $obj = json_decode($jsonObj);
+                $obj = json_decode($jsonObj, true);
                 return $obj;
             }
 
             $massiveDest = getMassiveFromCsv();
 
-            if (isset($_GET["numberTest"])):
+            if (isset($_GET["numberTest"])) {
                 $num = $_GET["numberTest"];
-                if (isset($massiveDest[$num-1])):
+                if (isset($massiveDest[$num-1])) { 
                     $testObj = getAndDecodeJson($massiveDest, $_GET["numberTest"]);?>
                     <form action='' method='POST'>
                     <?php
-                    if (isset($testObj)):
-                        foreach ($testObj as $key => $value):?>
-                            <fieldset>
-                                <legend><?=$value->description; ?></legend>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[0] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[1] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[2] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[3] ?></label>
-                            </fieldset>
-                        <?php 
-                        endforeach;
-                    endif;
-                endif;
-            endif;
-            
+                    if(isset($testObj)) {
+                    foreach ($testObj as $key => $value) { ?>
+                        <fieldset>
+                            <legend><?=$value->description; ?></legend>
+                            <label><input type="radio" name="q11"><?=$testObj->description; ?></label>
+                            <label><input type="radio" name="q12"><?=$testObj->description; ?></label>
+                            <label><input type="radio" name="q13"><?=$testObj->description; ?></label>
+                            <label><input type="radio" name="q14"><?=$testObj->description; ?></label>
+                        </fieldset>
+                    <?php }
+                    }
+                    ?>
+                        <input type='submit' value='Отправить'>
+                    </form>
+                    <?php
+                }
+            }
             if(isset($_POST['check'])) {
                 $sumtest = count($testObj)-1;
                 $failedQustions = [];
@@ -77,8 +79,6 @@
                     }
                 }
                 var_dump($_POST);
-                
-
             }
             ?>
         </body>
