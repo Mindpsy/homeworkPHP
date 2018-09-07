@@ -9,12 +9,12 @@
                 <input name="numberTest" type="text">
                 <input type="submit">
             </form>
-            
             <?php
+
             function getMassiveFromCsv () {
                 $massiveRows = [];
                 $handle = fopen("./tests/list.csv", "rb");
-                if ($handle) {
+                if($handle) {
                     $row =  fgetcsv($handle);
                     while ($row) {                            
                         $massiveRows[] = $row;
@@ -34,51 +34,69 @@
 
             $massiveDest = getMassiveFromCsv();
 
-            if (isset($_GET["numberTest"])):
-                $num = $_GET["numberTest"];
-                if (isset($massiveDest[$num-1])):
-                    $testObj = getAndDecodeJson($massiveDest, $_GET["numberTest"]);?>
+            if (isset($_GET["numberTest"])) {
+                $num = $_GET["numberTest"] - 1;
+                if (isset($massiveDest[$num])) { 
+                    $testObj = getAndDecodeJson($massiveDest, $num);?>
                     <form action='' method='POST'>
                     <?php
-                    if (isset($testObj)):
-                        foreach ($testObj as $key => $value):?>
+                    if(isset($testObj)) {
+                        foreach ($testObj as $key => $value) { ?>
                             <fieldset>
                                 <legend><?=$value->description; ?></legend>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[0] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[1] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[2] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[3] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[0]; ?>"><?=$value->answer[0] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[1]; ?>"><?=$value->answer[1] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[2]; ?>"><?=$value->answer[2] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[3]; ?>"><?=$value->answer[3] ?></label>
                             </fieldset>
-                        <?php 
-                        endforeach;
-                    endif;
-                endif;
-            endif;?>
-                        <input type="submit" value="Отправить" name="check">
+                        <?php
+                        }
+                    }
+                    ?>
+                    <?php if($_GET["numberTest"] != null): ?>
+                        <input type='submit' value='Отправить' name="check">
                     </form>
-            <?php
-            if(isset($_POST["check"])):
+                    <?php endif; ?>
+                <?php
+                }
+            }
+            
+
+            if(isset($_POST['check'])) {
                 $sumtest = count($testObj)-1;
                 $failedQustions = [];
-
-                foreach ($testObj as $key => $value):
-                    if($sumtest == $key):
-                        break;
-                    endif;
-                    if($value->correct != $POST[$key]):
+                $massiveAnswers = arrayFrom($_POST);
+                foreach ($testObj as $key => $value) {
+                    if($value->correct != $massiveAnswers[$key]) {
                         $failedQustions[] = $key;
-                    endif;
-                endforeach;
+                    }
+                    if($sumtest == $key) {
+                        break;
+                    }
+                }
                 
-                if(empty($failedQustions)):
-                    echo "Поздравляем вы правильно ответили на все вопросы!";
-                else:
-                    echo "Вы допустили ошибки в следующих вопросах";
-                    foreach($failedQustions as $keys => $values):
-                        echo "$keys";
-                    endforeach;
-                endif;
-            endif;
+                if(empty($failedQustions)) {
+                    echo "</br> Поздравляем вы правильно ответили на все вопросы!";
+                } else {
+                    echo "</br> Вы допустили ошибки в следующих номерах вопросов:";
+                    foreach($failedQustions as $keys => $values) {
+                        $fq = $values + 1;
+                        echo "</br> $fq";
+                    }
+                }
+                
+                
+
+            }
+
+            function arrayFrom ($fucObject) {
+                $regularMassive = [];
+                foreach($fucObject as $key => $value) {
+                    $regularMassive[] = $value;
+                }
+                return $regularMassive;
+
+            }
             ?>
-            </body>
-        </html>
+        </body>
+    </html>
