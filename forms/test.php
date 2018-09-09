@@ -44,10 +44,9 @@
                         foreach ($testObj as $key => $value): ?>
                             <fieldset>
                                 <legend><?=$value->description; ?></legend>
-                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[0]; ?>"><?=$value->answer[0] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[1]; ?>"><?=$value->answer[1] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[2]; ?>"><?=$value->answer[2] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[3]; ?>"><?=$value->answer[3] ?></label>
+                                <?php foreach($value->answer as $k => $v): ?>
+                                    <label><input type="radio" name="<?="q1".$key ?>" value="<?=$v; ?>"><?=$v ?></label>
+                                <?php endforeach; ?>
                             </fieldset>
                         <?php
                         endforeach;
