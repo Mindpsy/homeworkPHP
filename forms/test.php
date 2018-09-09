@@ -34,14 +34,14 @@
 
             $massiveDest = getMassiveFromCsv();
 
-            if (isset($_GET["numberTest"])) {
+            if (isset($_GET["numberTest"])):
                 $num = $_GET["numberTest"] - 1;
-                if (isset($massiveDest[$num])) { 
+                if (isset($massiveDest[$num])): 
                     $testObj = getAndDecodeJson($massiveDest, $num);?>
                     <form action='' method='POST'>
                     <?php
-                    if(isset($testObj)) {
-                        foreach ($testObj as $key => $value) { ?>
+                    if(isset($testObj)):
+                        foreach ($testObj as $key => $value): ?>
                             <fieldset>
                                 <legend><?=$value->description; ?></legend>
                                 <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[0]; ?>"><?=$value->answer[0] ?></label>
@@ -50,44 +50,42 @@
                                 <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[3]; ?>"><?=$value->answer[3] ?></label>
                             </fieldset>
                         <?php
-                        }
-                    }
+                        endforeach;
+                    endif;
                     ?>
                     <?php if($_GET["numberTest"] != null): ?>
                         <input type='submit' value='Отправить' name="check">
                     </form>
                     <?php endif; ?>
                 <?php
-                }
-            }
+                endif;
+            endif;
             
 
-            if(isset($_POST['check'])) {
+            if(isset($_POST['check'])):
                 $sumtest = count($testObj)-1;
                 $failedQustions = [];
                 $massiveAnswers = arrayFrom($_POST);
-                foreach ($testObj as $key => $value) {
-                    if($value->correct != $massiveAnswers[$key]) {
+                foreach ($testObj as $key => $value):
+                    if($value->correct != $massiveAnswers[$key]):
                         $failedQustions[] = $key;
-                    }
-                    if($sumtest == $key) {
+                    endif;
+                    if($sumtest == $key):
                         break;
-                    }
-                }
+                    endif;
+                endforeach;
                 
-                if(empty($failedQustions)) {
+                if(empty($failedQustions)):
                     echo "</br> Поздравляем вы правильно ответили на все вопросы!";
-                } else {
+                else:
                     echo "</br> Вы допустили ошибки в следующих номерах вопросов:";
-                    foreach($failedQustions as $keys => $values) {
+                    foreach($failedQustions as $keys => $values):
                         $fq = $values + 1;
                         echo "</br> $fq";
-                    }
-                }
+                    endforeach;
+                endif;
                 
-                
-
-            }
+            endif;
 
             function arrayFrom ($fucObject) {
                 $regularMassive = [];

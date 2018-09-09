@@ -35,49 +35,87 @@
             $massiveDest = getMassiveFromCsv();
 
             if (isset($_GET["numberTest"])):
-                $num = $_GET["numberTest"];
-                if (isset($massiveDest[$num-1])):
-                    $testObj = getAndDecodeJson($massiveDest, $_GET["numberTest"]);?>
+                $num = $_GET["numberTest"] - 1;
+                if (isset($massiveDest[$num])): 
+                    $testObj = getAndDecodeJson($massiveDest, $num);?>
                     <form action='' method='POST'>
                     <?php
-                    if (isset($testObj)):
-                        foreach ($testObj as $key => $value):?>
+                    if(isset($testObj)):
+                        foreach ($testObj as $key => $value): ?>
                             <fieldset>
                                 <legend><?=$value->description; ?></legend>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[0] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[1] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[2] ?></label>
-                                <label><input type="radio" name="<?="q1".$key ?>"><?=$value->answer[3] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[0]; ?>"><?=$value->answer[0] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[1]; ?>"><?=$value->answer[1] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[2]; ?>"><?=$value->answer[2] ?></label>
+                                <label><input type="radio" name="<?="q1".$key ?>" value="<?=$value->answer[3]; ?>"><?=$value->answer[3] ?></label>
                             </fieldset>
-                        <?php 
+                        <?php
                         endforeach;
                     endif;
+                    ?>
+                    <?php if($_GET["numberTest"] != null): ?>
+                        <input type='submit' value='Отправить' name="check">
+                    </form>
+                    <?php endif; ?>
+                <?php
                 endif;
             endif;
             
-            if(isset($_POST['check'])) {
+            if(isset($_POST['check'])):
                 $sumtest = count($testObj)-1;
                 $failedQustions = [];
-
-                foreach ($testObj as $key => $value) {
-                    if($sumtest == $key) {
-                        break;
-                    }
-                    if($value->correct != $POST[$key]) {
+                $massiveAnswers = arrayFrom($_POST);
+                foreach ($testObj as $key => $value):
+                    if($value->correct != $massiveAnswers[$key]):
                         $failedQustions[] = $key;
-                    }
-                }
+                    endif;
+                    if($sumtest == $key):
+                        break;
+                    endif;
+                endforeach;
                 
-                if(empty($failedQustions)) {
+                if(empty($failedQustions)):
                     echo "Поздравляем вы правильно ответили на все вопросы!";
-                } else {
+                    ?>
+                    <form action="" method="GET">
+                        <label>
+                            Введите свое имя для выдачи сертификата :)
+                            <input type="text" name="nameWinner">
+                            <input type="submit" name="pushName" value="Отправить">
+                        </label>
+                    </form>
+                <?php
+                else:
                     echo "Вы допустили ошибки в следующих вопросах";
-                    foreach($failedQustions as $keys => $values) {
+                    foreach($failedQustions as $keys => $values):
                         echo "$keys";
-                    }
+                    endforeach;
+                endif;
+            endif;
+
+            if (isset($_GET['pushName'])):
+                var_dump("нажал на отправить");
+                if(isset($_GET['nameWinner'])):
+                    var_dump("нажал на отправить");
+                    header('Content-type: image/jpeg');
+                    $nameWinner = $_GET['nameWinner'];
+                    $balls = count($sumtest) - $failedQustions;
+                    $text = "$nameWinner Набрал(а) </br> $balls баллов";
+                    $im = imagecreatetruecolor(200, 200)
+                        or die("Невозможно инициализировать список gd");
+                    $textcolor = imagecolorallocate($im, 233, 14, 91);
+                    imageString($im, 1, 5, 5, $text, $textcolor);
+                    imagepng($im);
+                    imagedestroy($im);
+                endif;
+            endif;
+            
+            function arrayFrom ($fucObject) {
+                $regularMassive = [];
+                foreach($fucObject as $key => $value) {
+                    $regularMassive[] = $value;
                 }
-                var_dump($_POST);
-                
+                return $regularMassive;
 
             }
             ?>
