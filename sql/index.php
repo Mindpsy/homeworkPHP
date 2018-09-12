@@ -5,16 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <style>
+    table { 
+        border-spacing: 0;
+        border-collapse: collapse;
+    }
+
+    table td, table th {
+        border: 1px solid #ccc;
+        padding: 5px;
+    }
+    
+    table th {
+        background: #eee;
+    }
+</style>
 </head>
 <body>
+<!--
+<form method="GET">
+    <input type="text" name="isbn" placeholder="ISBN" value="" />
+    <input type="text" name="name" placeholder="Название книги" value="" />
+    <input type="text" name="author" placeholder="Автор книги" value="" />
+    <input type="submit" value="Поиск" />
+</form>
+-->
     <table>
         <tr>
-            <td>id</td>
-            <td>name</td>
-            <td>author</td>
-            <td>year</td>
-            <td>isbn</td>
-            <td>genre</td>
+            <th>Номер</th>
+            <th>Название книги</th>
+            <th>Автор</th>
+            <th>Год выпуска</th>
+            <th>Жанр</th>
+            <th>ISBN</th>
         </tr>
         <?php 
         $pdo = new PDO("mysql:host=localhost;dbname=netology", "admin", "123456");
@@ -28,8 +51,8 @@
             <td><?=$value['name']; ?></td>
             <td><?=$value['author']; ?></td>
             <td><?=$value['year']; ?></td>
-            <td><?=$value['isbn']; ?></td>
             <td><?=$value['genre']; ?></td>
+            <td><?=$value['isbn']; ?></td>
         </tr>
         <?php 
         endforeach;?>
