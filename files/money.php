@@ -1,14 +1,15 @@
 <?php
 $errorArgum1 = "Ошибка! Аргументы заданы неверно. Укажите флаг --today или запустите скрипт с аргументами {цена} и {описание покупки}";
 $errorNoArgum = "Ошибка! Аргументы не заданы. Укажите флаг --today или запустите скрипт с аргументами {цена} и {описание покупки}";
+
 if ($argv[1] == "--today") {
     today();
 } elseif ($argv[1] == NULL || $argv[2] == NULL) {
-    var_dump($errorNoArgum);
+    echo $errorNoArgum;
 } else {
     if ($argv[1]) {
         if (!is_numeric($argv[1])) {
-            var_dump($errorArgum1);
+            echo $errorArgum1;
         } else {
             addNew ($argv);
         }
@@ -29,9 +30,9 @@ function today ()
     }
     if ($sumToday > 0) {
         $nowDate = date('Y-m-d');
-        var_dump("$nowDate расход за день: $sumToday руб.");
+        echo "$nowDate расход за день: $sumToday руб.";
     } else {
-        var_dump('Нет записей за сегодня');
+        echo 'Нет записей за сегодня';
     }
     fclose($handleToday);
 }
