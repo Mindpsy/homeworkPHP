@@ -6,41 +6,32 @@
         </head>
         <body>
             <table>
-                <tr>
-                    <td>Номер теста</td>
-                    <td>Название теста</td>
-                    <td>Путь теста</td>
-                    <td>Пройти тест</td>
-                </tr>
-                <?php
-                function getMassiveTests () {
-                    $massiveRows = [];
-                    $handle = fopen("./tests/list.csv", "rb");
-                    if($handle) {
-                        $row =  fgetcsv($handle);
-                        while ($row) {                            
-                            $massiveRows[] = $row;
-                            $row =  fgetcsv($handle);
-                        }
-                        fclose($handle);
-                        return $massiveRows;
-                    }
-                }
-                $massiveTests = getMassiveTests();
+                    <tr>
+                        <td>Номер теста</td>
+                        <td>Путь теста</td>
+                        <td>Пройти тест</td>
+                    </tr>
+                    <?php
+                    if ($dh = opendir("tests")):
+                        while (($file = readdir($dh)) !== false):
+                            if ($file != "." && $file != ".."):
+                                static $numT = 0;
+                                $numT++;
+                    ?>
+                    <tr>
+                        <td><?=$numT ;?></td>
+                        <td><?=$file ;?></td>
+                        <td><a href="/test.php?numberTest=<?=$file; ?>">Пройти тест</a></td>
+                        <?php if(isset($_SESSION['user'])): ?>
+                        <td>Удалить</td>
+                        <?php endif; ?>
+                    </tr>
+                            <?php endif; 
+                        endwhile;
+                        closedir($dh);
+                    endif; ?>
+                </table>
 
-                for ($i = 0; $i < count($massiveTests); $i++) {
-                    $num = $i + 1;
-                    $nameTest =$massiveTests[$i][0];
-                    $pathTest = $massiveTests[$i][1];
-                    echo "<tr>";
-                    echo "<td>$num</td>";
-                    echo "<td>$nameTest</td>";
-                    echo "<td>$pathTest</td>";
-                    echo "<td>Пройти</td>";
-                    echo "</tr>";
-                }
-                ?>
-            </table>
 
-        </body>
+            </body>
     </html>

@@ -11,36 +11,20 @@
             </form>
             <?php
 
-            function getMassiveFromCsv () {
-                $massiveRows = [];
-                $handle = fopen("./tests/list.csv", "rb");
-                if($handle) {
-                    $row =  fgetcsv($handle);
-                    while ($row) {                            
-                        $massiveRows[] = $row;
-                        $row =  fgetcsv($handle);
-                    }
-                    fclose($handle);
-                    return $massiveRows;
-                }
-            }
 
-            function getAndDecodeJson ($massive, $testNum) {
-                $url = $massive[$testNum][1];
-                $jsonObj = file_get_contents($url);
+            function getAndDecodeJson ($path) {
+                $jsonObj = file_get_contents("tests/$path");
                 $obj = json_decode($jsonObj);
                 return $obj;
             }
 
-            $massiveDest = getMassiveFromCsv();
-
             if (isset($_GET["numberTest"])):
-                $num = $_GET["numberTest"] - 1;
-                if (isset($massiveDest[$num])): 
-                    $testObj = getAndDecodeJson($massiveDest, $num);?>
+                $dirTest = $_GET["numberTest"];
+                ?>
                     <form action='' method='POST'>
                     <?php
-                    if(isset($testObj)):
+                    if(is_file("tests/$dirTest")):
+                        $testObj = getAndDecodeJson ($dirTest);
                         foreach ($testObj as $key => $value): ?>
                             <fieldset>
                                 <legend><?=$value->description; ?></legend>
@@ -51,14 +35,12 @@
                         <?php
                         endforeach;
                     endif;
-                    ?>
-                    <?php if($_GET["numberTest"] != null): ?>
+                    if($_GET["numberTest"] != null): ?>
                         <input type='submit' value='Отправить' name="check">
                     </form>
-                    <?php endif; ?>
-                <?php
+                    <?php 
+                    endif;
                 endif;
-            endif;
             
 
             if(isset($_POST['check'])):
