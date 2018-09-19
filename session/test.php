@@ -1,8 +1,14 @@
+<?php 
+session_start();
+$nameWinner = $_SESSION['name'];
+?>
 <!DOCTYPE>
     <html>
         <head>
             <meta charset="utf-8">
             <title>Прохождение теста</title>
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    
         </head>
         <body>
             <form action="./test.php" method="get">
@@ -10,75 +16,82 @@
                 <input type="submit">
             </form>
             <?php
-
-            function getMassiveFromCsv () {
-                $massiveRows = [];
-                $handle = fopen("./tests/list.csv", "rb");
-                if($handle) {
-                    $row =  fgetcsv($handle);
-                    while ($row) {                            
-                        $massiveRows[] = $row;
-                        $row =  fgetcsv($handle);
-                    }
-                    fclose($handle);
-                    return $massiveRows;
-                }
-            }
-
-            function getAndDecodeJson ($massive, $testNum) {
-                $url = $massive[$testNum][1];
-                $jsonObj = file_get_contents($url);
-                $obj = json_decode($jsonObj, true);
+            function getAndDecodeJson ($path) {
+                $jsonObj = file_get_contents("tests/$path");
+                $obj = json_decode($jsonObj);
                 return $obj;
             }
 
-            $massiveDest = getMassiveFromCsv();
-
-            if (isset($_GET["numberTest"])) {
-                $num = $_GET["numberTest"];
-                if (isset($massiveDest[$num-1])) { 
-                    $testObj = getAndDecodeJson($massiveDest, $_GET["numberTest"]);?>
+            if (isset($_GET["numberTest"])):
+                $dirTest = $_GET["numberTest"];
+                ?>
                     <form action='' method='POST'>
                     <?php
-                    if(isset($testObj)) {
-                    foreach ($testObj as $key => $value) { ?>
-                        <fieldset>
-                            <legend><?=$value->description; ?></legend>
-                            <label><input type="radio" name="q11"><?=$testObj->description; ?></label>
-                            <label><input type="radio" name="q12"><?=$testObj->description; ?></label>
-                            <label><input type="radio" name="q13"><?=$testObj->description; ?></label>
-                            <label><input type="radio" name="q14"><?=$testObj->description; ?></label>
-                        </fieldset>
-                    <?php }
-                    }
-                    ?>
-                        <input type='submit' value='Отправить'>
+                    if(is_file("tests/$dirTest")):
+                        $testObj = getAndDecodeJson ($dirTest);
+                        foreach ($testObj as $key => $value): ?>
+                            <fieldset>
+                                <legend><?=$value->description; ?></legend>
+                                <?php foreach($value->answer as $k => $v): ?>
+                                    <label><input type="radio" name="<?="q1".$key ?>" value="<?=$v; ?>"><?=$v ?></label>
+                                <?php endforeach; ?>
+                            </fieldset>
+                        <?php
+                        endforeach;
+                    endif;
+                    if($_GET["numberTest"] != null): ?>
+                        <input type='submit' value='Отправить' name="check">
                     </form>
-                    <?php
-                }
-            }
-            if(isset($_POST['check'])) {
+                    <?php 
+                    endif;
+                endif;
+            
+            if(isset($_POST['check'])):
                 $sumtest = count($testObj)-1;
                 $failedQustions = [];
-
-                foreach ($testObj as $key => $value) {
-                    if($sumtest == $key) {
-                        break;
-                    }
-                    if($value->correct != $POST[$key]) {
+                $massiveAnswers = arrayFrom($_POST);
+                foreach ($testObj as $key => $value):
+                    if($value->correct != $massiveAnswers[$key]):
                         $failedQustions[] = $key;
-                    }
-                }
+                    endif;
+                    if($sumtest == $key):
+                        break;
+                    endif;
+                endforeach;
                 
-                if(empty($failedQustions)) {
+                if(empty($failedQustions)):
                     echo "Поздравляем вы правильно ответили на все вопросы!";
-                } else {
+                    if(!$_SESSION['adminStatus'] && !$_SESSION['guestStaus']):?>
+                    <form action="" method="GET">
+                        <label>
+                            Введите свое имя для выдачи сертификата :)
+                            <input type="text" name="nameWinner">
+                            <input type="submit" name="pushName" value="Отправить">
+                        </label>
+                    </form>
+                <?php
+                    else:
+                        $balls = ($sumtest - count($failedQustions)) + 1;
+                        $imgName = $_SESSION['name']; ?>
+                    <br/>
+                    <img src=<?="sertificate.php?nameWinner={$imgName}&result={$balls}" ?> />
+                <?php 
+                    endif;       
+                else:
                     echo "Вы допустили ошибки в следующих вопросах";
-                    foreach($failedQustions as $keys => $values) {
+                    foreach($failedQustions as $keys => $values):
                         echo "$keys";
-                    }
+                    endforeach;
+                endif;
+            endif;
+            
+            function arrayFrom ($fucObject) {
+                $regularMassive = [];
+                foreach($fucObject as $key => $value) {
+                    $regularMassive[] = $value;
                 }
-                var_dump($_POST);
+                return $regularMassive;
+
             }
             ?>
         </body>
