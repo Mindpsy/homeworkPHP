@@ -6,7 +6,7 @@ $name = !empty($_GET['name']) ? $_GET['name'] : '';
 $author = !empty($_GET['author']) ? $_GET['author'] : '';
 $isbn = !empty($_GET['isbn']) ? $_GET['isbn'] : '';
 
-$sqlSearch = "select name, author, year, isbn, genre
+$sqlSearch = "select name, author, year, isbn, genre, id
                 from books
                 where name like ? and author like ? and isbn like ?";
 
