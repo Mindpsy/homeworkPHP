@@ -1,3 +1,20 @@
+<?php 
+
+$pdo = new PDO("mysql:host=localhost;dbname=netology;charset=utf8", "admin", "123456");
+
+$name = !empty($_GET['name']) ? $_GET['name'] : '';
+$author = !empty($_GET['author']) ? $_GET['author'] : '';
+$isbn = !empty($_GET['isbn']) ? $_GET['isbn'] : '';
+
+$sqlSearch = "select name, author, year, isbn, genre
+                from books
+                where name like ? and author like ? and isbn like ?";
+
+$sth = $pdo->prepare($sqlSearch);
+$sth->execute(["%$name%","%$author%", "%$isbn%"]);
+$result = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -5,31 +22,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <style>
-    table { 
-        border-spacing: 0;
-        border-collapse: collapse;
-    }
-
-    table td, table th {
-        border: 1px solid #ccc;
-        padding: 5px;
-    }
-    
-    table th {
-        background: #eee;
-    }
-</style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!--
+
 <form method="GET">
     <input type="text" name="isbn" placeholder="ISBN" value="" />
     <input type="text" name="name" placeholder="Название книги" value="" />
     <input type="text" name="author" placeholder="Автор книги" value="" />
     <input type="submit" value="Поиск" />
 </form>
--->
+
     <table>
         <tr>
             <th>Номер</th>
@@ -39,12 +42,7 @@
             <th>Жанр</th>
             <th>ISBN</th>
         </tr>
-        <?php 
-        $pdo = new PDO("mysql:host=localhost;dbname=netology", "admin", "123456");
-        $sql = "select * from books";
-        $sth = $pdo->prepare($sql);
-        $sth->execute();
-        $result = $sth->fetchAll(PDO::FETCH_ASSOC);
+        <?php         
         foreach($result as $key => $value): ?>
         <tr>
             <td><?=$value['id']; ?></td>
