@@ -2,31 +2,30 @@
 $massiveNamesC = array();
 $dataBase = readData($massiveNamesC);
 
-searchCountry($argv[1], $dataBase);
+if (isset($argv[1])) {
+    searchCountry($argv[1], $dataBase);
+} else {
+    echo "Введите название страны";
+}
 
 
 
 function readData ($namesC) 
 {
     $handleVisa = fopen("./dataVisa.csv", "rb");
-    $countNulls = 0;
     if($handleVisa) {
         $tempData = fgetcsv($handleVisa, 100, ",");
         $massiveData = array();
         while ($tempData) {
-            if ($tempData[1] !== NULL) {
+            if (isset($tempData[1]) && isset($tempData[4])) {
                 $massiveData += [$tempData[1]=>$tempData[4]];
                 $namesC[] = $tempData[1];
-                $tempData = fgetcsv($handleVisa, 100, ",");
+                
             }
-            if ($tempData[1] == NULL) {
             $tempData = fgetcsv($handleVisa, 100, ",");
-            $countNulls++;
-            }
         }
         fclose($handleVisa);
     }
-    echo "Число Нулов за все циклы: $countNulls \r\n";
     return $massiveData;
 }
 
