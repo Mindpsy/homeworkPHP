@@ -1,149 +1,184 @@
 <?php
-session_start();
-require_once "/model/model.php";
+require_once "model/model.php";
 
-$config = new Config("localhost", "todoAplpication", "root", "");
-$model = new Model();
-$model->connectDataBase($config);
+class Controller {
+    public $pdo;
 
-// если сессия жива 
-if(isset($_SESSION['authStatus'])) {
-    if (!isset($_GET['controller']) && !isset($_GET['action'])) {
-        $controller = "accaunt";
-        $action = "showCountTasks";
+        // метды для получения параметров верстки в зависимости от того аутентификайия это или регистрация 
+    public function getLoginOlaceholder () {
+        $loginOlaceholder = (empty($_GET['registration'])) ? "Введите логин" : "Придумайе логин";
+        return $loginOlaceholder;
+    }
+
+    public function getPasswordplaceholder () {
+        $passwordplaceholder = (empty($_GET['registration'])) ? "Введите пароль" : "Придумайе пароль";
+        return $passwordplaceholder;
+    }
+
+    public function getLoginName () {
+        $loginName = (empty($_GET['registration'])) ? "loginAuth" : "loginReg";
+        return $loginName;
+    }
+
+    public function getPassName () {
+        $passName = (empty($_GET['registration'])) ? "passAuth" : "passReg";
+        return $passName;
+    }
+
+    public function getTitleH2 () {
+        $titleH2 = (empty($_GET['registration'])) ? "Авторизация" : "Регистрация";
+        return $titleH2;
         
-    } else if (($_GET['controller'] === "base") && ($_GET['action'] === "login")) {
-        $controller = "accaunt";
-        $action = "showCountTasks";
+    }
 
-    } else if (($_GET['controller'] === "accaunt") && ($_GET['action'] === "showCountTasks")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
+    public function getTextButtonSubmit () {
+        $textButtonSubmit = (empty($_GET['registration'])) ? "Войти" : "Зарегистрироваться";
+        return $textButtonSubmit;
+    }
 
-    } else if (($_GET['controller'] === "accaunt") && ($_GET['action'] === "exitAcc")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
+    public function getNameButtonSubmit () {
+        $nameButtonSubmit = (empty($_GET['registration'])) ? "authoriseSubmit" : "regSubmit";
+        return $nameButtonSubmit;
+    }
 
-    } else if (($_GET['controller'] === "accaunt") && ($_GET['action'] === "showDeligatedTasks")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
+    public function getFormAction () {
+        $action = (empty($_GET['registration'])) ? "login" : "registration";
+        return $action;
+    }
 
-    } else if (($_GET['controller'] === "accaunt") && ($_GET['action'] === "addNewTask")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
+    public function authorise () {
+        if (isset($_GET['authoriseSubmit'])) {
+            if (!empty($_GET['loginAuth']) && !empty($_GET['passAuth'])) {
+                $model = new Model();
+                $resAuth = $model->authorise($_GET['loginAuth'], $_GET['passAuth'], $this->pdo);
+                if($resAuth) {
+                    header("location: ?controller=accaunt&action=showCountTasks");
+                }
+            } else {
+                echo "<li>Please edite fields</li> </br> <a href='/'>try againt</a>";
+            }
+        }
+    }
 
-    } else if (($_GET['controller'] === "accaunt") && ($_GET['action'] === "showSummTask")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
-
-    } else if (($_GET['controller'] === "accaunt") && ($_GET['action'] === "deleteTask")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
-
-    } else if (($_GET['controller'] === "accaunt") && ($_GET['action'] === "toDeligateTask")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
-
-    } else if (($_GET['controller'] === "accaunt") && ($_GET['action'] === "changeStatus")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
+    public function showTasks () {
+        $model = new Model();
+        $resMyLogin = $model->getMyLogin($this->pdo);
+        $resMyBussines = $model->showTasks($this->pdo);
+        $assignedUserList = $model->getAssignedUserList($this->pdo);
+        require_once "view/tasks.php";
 
     }
 
-    if ($controller === "accaunt") {
-        $resMyLogin = $model->getMyLogin();
-        $assignedUserList = $model->getAssignedUserList();
-        
-
-        if ($action === "showCountTasks") {
-            $resMyBussines = $model->showTasks();
-            require_once "/view/tasks.php";
-
-        } else if ($action === "showDeligatedTasks") {
-            $assignedUserList = $model->getAssignedUserList();
-            $resMyBussines = $model->showDeligated();
-            require_once "/view/tasks.php";
-
-        } else if ($action === "addNewTask") {
-            $model->addTask();
-            header("location: /");
-
-        } else if ($action === "showSummTask") {
-            $resSummTasks = $model->showSummTask();
-            require_once "/view/tasks.php";
-
-        } else if ($action === "deleteTask") {
-            $model->delTask();
-            header("location: /");
-
-        }  else if ($action === "toDeligateTask") {
-            $assignedUserList = $model->getAssignedUserList();
-            $model->deligateTask();
-            header("location: /");
-
-        }  else if ($action === "changeStatus") {
-            $model->changeStatusTask();
-            header("location: /");
-
-        } else if ($action === "exitAcc") {
+    public function exitAcc () {
+        if(isset($_GET['exitBtn'])) {
+            $model = new Model();
             $model->exitFromAcc();
             header("location: ?controller=form&action=auth");
+        }
+    }
+    
+    public function showDeligated () {
+        if(isset($_GET['showDelegatedBtn'])) {
+            $model = new Model();
+            $resMyLogin = $model->getMyLogin($this->pdo);
+            $resMyBussines = $model->showDeligated($this->pdo);
+            $assignedUserList = $model->getAssignedUserList($this->pdo);
+            require_once "/view/tasks.php";
 
         }
-    
-    } 
-
-
-    // если сессии нет
-} else {
-    if (!isset($_GET['controller']) && !isset($_GET['action'])) {
-        $controller = "form";
-        $action = "auth";
-
-    } else if (($_GET['controller'] === "form") && ($_GET['action'] === "auth")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
-    
-    } else if (($_GET['controller'] === "base") && ($_GET['action'] === "login")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
-    
-    } else if (($_GET['controller'] === "form") && ($_GET['action'] === "reg")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
-    
-    } else if (($_GET['controller'] === "base") && ($_GET['action'] === "registration")) {
-        $controller = $_GET['controller'];
-        $action = $_GET['action'];
-    
     }
 
-    if($controller === "form") {
-        if (($action === "auth") || ($action === "reg")) {
-            require_once "/view/signin.php";
     
-        } 
-    } else if ($controller === "base") {
-        if ($action === "login") {
-            $model->authorise();
-            $resMyLogin = $model->getMyLogin();
-            header("location: ?controller=accaunt&action=showCountTasks");
-
-        } else if ($action === "registration") {
-            $model->registration();
-            header("location: ?controller=form&action=auth");
-            echo "<li>Registration complite!</li>";
-
     
+    public function addNewTask () {
+        if (isset($_GET['addTaskBtn'])) {
+            if(isset($_GET['newDescription'])) {
+                $model = new Model();
+                $model->addTask($_GET['newDescription'], $this->pdo);
+                header("location: /");
+
+            }
+        } else {
+            echo "<li>To Write the decscription task</li>";
         }
+    }
+
+    public function showSummTasks () {
+        $model = new Model();
+        $resMyLogin = $model->getMyLogin($this->pdo);
+        $resSummTasks = $model->showSummTask($this->pdo);
+        require_once "/view/tasks.php";
+
+    }
+
+    public function deleteTask () {
+        if (isset($_GET['toDelBtn']) && isset($_GET['idTaskDel'])) {
+            $model = new Model();
+            $model->delTask($_GET['idTaskDel'], $this->pdo);
+            header("location: /");
+        }
+    }
+
+    public function toDeligateTask () {
+        if (isset($_GET['toDeligateBtn'])) {
+            $model = new Model();
+            $model->deligateTask($_GET['assigned_user_id'], $_GET['task_id'], $this->pdo);
+            header("location: /");
+        }
+
+    }
+    
+    public function changeStatusTask () {
+        if (isset($_GET['idForTurn']) && isset($_GET['statusTask'])) {
+            $model = new Model();
+            $model->changeStatusTask($_GET['idForTurn'], $_GET['statusTask'], $this->pdo);
+            header("location: /");
+        }
+
+    }
+
+    public function showAuthForm () {
+        $model = new Model();
+        $titleH2 = $this->getTitleH2();
+        $FormAction =$this->getFormAction();
+        $LoginName = $this->getLoginName();
+        $LoginOlaceholder = $this->getLoginOlaceholder();
+        $PassName = $this->getPassName();
+        $Passwordplaceholder = $this->getPasswordplaceholder();
+        $NameButtonSubmit = $this->getNameButtonSubmit();
+        $TextButtonSubmit = $this->getTextButtonSubmit();
+        require_once "/view/signin.php";
+
+    }
+
+    public function registration () {
+        if(isset($_GET['regSubmit'])) {
+            if(!empty($_GET['loginReg']) && !empty($_GET['passReg'])) {
+                $model = new Model();
+                $model->registration($_GET['loginReg'], $_GET['passReg'], $this->pdo);
+                header("location: ?controller=form&action=auth");
+                echo "<li>Registration complite!</li>";
+
+            } else {
+                echo "<li>Please edite fields</li> </br> <a href='/?registration=true'>try againt</a>";
+            }
         
-    } else if ($controller === "accaunt") {
-        if ($action === "exitAcc") {
-            require_once "/view/signin.php";
-
         }
+
     }
 
+    public function connectDataBase ($config) {
+        $model = new Model();
+        $this->pdo = $model->connectDataBase($config);
+        return $this->pdo;
+    }
 
+    public function getMyLogin () {
+        $model = new Model();
+        $resMyLogin = $model->getMyLogin($this->pdo);
+        return $resMyLogin;
+
+    }
 }
+
 ?>

@@ -1,21 +1,8 @@
 <?php 
-// Подключаем полезную функцию dumper() 
+require_once "config.php";
+// Подключаем полезную для отладки функцию dumper() 
 require_once "dumper.php";
 ini_set('error_reporting', E_ALL);
-
-class Config {
-    public $host;
-    public $dbname;
-    public $login;
-    public $password;
-
-    public function __construct ($tmpHost, $tmpDbname, $tmpLogin, $tmpPassword) {
-        $this->host = $tmpHost;
-        $this->dbname = $tmpDbname;
-        $this->login = $tmpLogin;
-        $this->password = $tmpPassword;
-    }
-} 
 
 class Model {
 
@@ -36,74 +23,39 @@ class Model {
     public $sqlUpdateStatusTask = "UPDATE task SET is_done=? WHERE user_id=? AND id=? LIMIT 1";
     public $sqlCountTasks = "SELECT count(*) as sum FROM task as t WHERE t.user_id = ? OR t.assigned_user_id = ?";
     // здесь храним обьект pdo 
-    private $pdo;
+    public $pdo;
 
     // метод соеденения с базой 
     public function connectDataBase ($config) {
         $this->pdo = new PDO("mysql:host={$config->host};dbname={$config->dbname};charset=utf8", $config->login, $config->password);
         return $this->pdo;
     }
-    // метды для получения параметров верстки в зависимости от того аутентификайия это или регистрация 
-    public function getLoginOlaceholder () {
-        $loginOlaceholder = (empty($_GET['registration'])) ? "Введите логин" : "Придумайе логин";
-        return $loginOlaceholder;
-    }
 
-    public function getPasswordplaceholder () {
-        $passwordplaceholder = (empty($_GET['registration'])) ? "Введите пароль" : "Придумайе пароль";
-        return $passwordplaceholder;
-    }
-
-    public function getLoginName () {
-        $loginName = (empty($_GET['registration'])) ? "loginAuth" : "loginReg";
-        return $loginName;
-    }
-    
-    public function getPassName () {
-        $passName = (empty($_GET['registration'])) ? "passAuth" : "passReg";
-        return $passName;
-    }
-
-    public function getTitleH2 () {
-        $titleH2 = (empty($_GET['registration'])) ? "Авторизация" : "Регистрация";
-        return $titleH2;
-    }
-    
-    public function getTextButtonSubmit () {
-        $textButtonSubmit = (empty($_GET['registration'])) ? "Войти" : "Зарегистрироваться";
-        return $textButtonSubmit;
-    }
-    
-    public function getNameButtonSubmit () {
-        $nameButtonSubmit = (empty($_GET['registration'])) ? "authoriseSubmit" : "regSubmit";
-        return $nameButtonSubmit;
-    }
-
-    public function getFormAction () {
-        $action = (empty($_GET['registration'])) ? "login" : "registration";
+    public function getFormAction ($isRegistration) {
+        $action = (empty($isRegistration)) ? "login" : "registration";
         return $action;
     }
 
-    public function getMyLogin () {
+    public function getMyLogin ($pdo) {
         $idUser = $this->getIdUser();
-        $resMyLogin = $this->makerSqlQuery($this->sqlLoginForId, ["$idUser"]);
+        $resMyLogin = $this->makerSqlQuery($pdo, $this->sqlLoginForId, ["$idUser"]);
         return $resMyLogin;
     }
 
-    public function getAssignedUserList () {
-        $assignedUserList = $this->makerSqlQuery($this->sqlListAllUsers);
+    public function getAssignedUserList ($pdo) {
+        $assignedUserList = $this->makerSqlQuery($pdo, $this->sqlListAllUsers);
         return $assignedUserList;
     }
 
     // методы для запросов
-    public function makerSqlQuery ($sql, $prePar=[""]) {
+    public function makerSqlQuery ($pdo, $sql, $prePar=[""]) {
         // dumper("sql");
         // dumper($sql);
         // dumper("prePar");
         // dumper($prePar);
         try 
         {
-            $sth = $this->pdo->prepare($sql);
+            $sth = $pdo->prepare($sql);
             $rres = $sth->execute($prePar);
             if (!$rres) {
                 echo "\nPDO::errorInfo():\n";
@@ -119,118 +71,95 @@ class Model {
         }
         
     }
-    // метод авторизации 
-    public function authorise () {
-        if (isset($_GET['authoriseSubmit'])) {
-            if (!empty($_GET['loginAuth']) && !empty($_GET['passAuth'])) {
-                $tmpLoginAuth = $_GET['loginAuth'];
-                $tempPassAuth = $_GET['passAuth'];
-                $resAuth = $this->makerSqlQuery($this->sqlLogPassIssSet, ["$tmpLoginAuth", "$tempPassAuth"]);
-                if($resAuth) {
-                    $_SESSION['login'] = $resAuth[0]['login'];
-                    $_SESSION['authStatus'] = 1;
-                    $_SESSION['user_id'] = $this->makerSqlQuery($this->sqlIdForLogin, ["$tmpLoginAuth"])[0]['id'];
-                }
-            }
     
+    // метод авторизации 
+    public function authorise ($loginAuth, $passAuth, $pdo) {
+        $tmpLoginAuth = $loginAuth;
+        $tempPassAuth = $passAuth;
+        $resAuth = $this->makerSqlQuery($pdo, $this->sqlLogPassIssSet, ["$tmpLoginAuth", "$tempPassAuth"]);
+        if($resAuth) {
+            $_SESSION['login'] = $resAuth[0]['login'];
+            $_SESSION['authStatus'] = 1;
+            $_SESSION['user_id'] = $this->makerSqlQuery($pdo, $this->sqlIdForLogin, ["$tmpLoginAuth"])[0]['id'];
+            return true;
+        } else {
+            echo "<li>Wrong password or login! Please edite fields again or <a href='/?registration=true'>register</a></li> </br> <a href='/'>try againt</a>";
         }
     }
+
     // метод регистрации 
-    public function registration () {
-        if(isset($_GET['regSubmit'])) {
-            if(!empty($_GET['loginReg']) && !empty($_GET['passReg'])) {
-                $tmpLoginReg = $_GET['loginReg'];
-                $result = $this->makerSqlQuery($this->sqlLoginIsSet, ["$tmpLoginReg"]);
-                if ($result) {
-                    echo "<li>Login already Set!</li> <li><a href='/?registration=true'>try againt</a></li>";
+    public function registration ($loginReg, $passReg, $pdo) {
+        $result = $this->makerSqlQuery($pdo, $this->sqlLoginIsSet, ["$loginReg"]);
+        if ($result) {
+            echo "<li>Login already Set!</li> <li><a href='/?registration=true'>try againt</a></li>";
 
-                } else {
-                    $tmpLoginReg = $_GET['loginReg'];
-                    $tempPassReg = $_GET['passReg'];
-                    $regResult = $this->makerSqlQuery($this->sqlAddUser, ["$tmpLoginReg", "$tempPassReg"]);        
-                }
-            } else {
-                echo "<li>Please edite fields</li> </br> <a href='/?registration=true'>try againt</a>";
-            }
-        
+        } else {
+            return $this->makerSqlQuery($pdo, $this->sqlAddUser, ["$loginReg", "$passReg"]);
+
         }
-
     }
+
     // метод для получения списка задач 
-    public function showTasks () {
+    public function showTasks ($pdo) {
         $idUser = $this->getIdUser();
-        $resMyBussiness = $this->makerSqlQuery($this->sqlMyBussiess, ["$idUser"]);
+        $resMyBussiness = $this->makerSqlQuery($pdo, $this->sqlMyBussiess, ["$idUser"]);
         return $resMyBussiness;
     }
+
     // метод для добавления новой задачи в базу 
-    public function addTask () {
-        if (isset($_GET['addTaskBtn'])) {
-            if(isset($_GET['newDescription'])) {
-                $idUser = $this->getIdUser();
-                $tmpDescr = $_GET['newDescription'];
-                $tmpStatusTask = "false";
-                $tmpDate = date("d.m.Y");
-                $resNewTask = $this->makerSqlQuery($this->sqlAddNewTask, ["$idUser", 
-                                                                    "$idUser", 
-                                                                    "$tmpDescr", 
-                                                                    "$tmpStatusTask", 
-                                                                    "$tmpDate"]);
-            } else {
-                echo "<li>To Write the decscription task</li>";
-            }
-        }
-    }
-    // метод для делегирования задачи 
-    public function deligateTask () {
-        if (isset($_GET['toDeligateBtn'])) {
-            $idUser = $this->getIdUser(); 
-            $tmpAssignUserId = $_GET['assigned_user_id'];
-            $tmpTaskId = $_GET['task_id'];
-            $resDeligate = $this->makerSqlQuery($this->sqlUpdateAsigned, ["$tmpAssignUserId", "$tmpTaskId", "$idUser"]);
-        }
-    }
-    // метод для удаления задачи 
-    public function delTask () {
-        if (isset($_GET['toDelBtn']) && isset($_GET['idTaskDel'])) {
-            $idUser = $this->getIdUser();
-            $tmpIdTaskDel = $_GET['idTaskDel'];
-            $this->makerSqlQuery($this->sqlDeleteTask, ["$idUser", "$tmpIdTaskDel"]);
-        }
-    }
-    // метод для загрузки делегированный дел 
-    public function showDeligated () {
-        if(isset($_GET['showDelegatedBtn'])) {
-            $idUser = $this->getIdUser();
-            $resMyBussines = $this->makerSqlQuery($this->sqlAllDelegated, ["$idUser", "$idUser"]);
-            return $resMyBussines;
-        }
-    }
-
-    public function changeStatusTask () {
-        if (isset($_GET['idForTurn']) && isset($_GET['statusTask'])) {
-            $idUser = $this->getIdUser();
-            $tmpIdForDone = $_GET['idForTurn'];
-            $tmpNewStatus = !$_GET['statusTask'];
-            $this->makerSqlQuery($this->sqlUpdateStatusTask, ["$tmpNewStatus", "$idUser", "$tmpIdForDone"]);
-        }
-    }
-
-    public function showSummTask () {
+    public function addTask ($newDescription, $pdo) {
         $idUser = $this->getIdUser();
-        $resSummTasks = $this->makerSqlQuery($this->sqlCountTasks, ["$idUser", "$idUser"])[0]['sum'];
+        $tmpStatusTask = "false";
+        $tmpDate = date("d.m.Y");
+        $resNewTask = $this->makerSqlQuery($pdo, $this->sqlAddNewTask, ["$idUser", 
+                                                            "$idUser", 
+                                                            "$newDescription", 
+                                                            "$tmpStatusTask", 
+                                                            "$tmpDate"]);
+    }
+
+    // метод для делегирования задачи 
+    public function deligateTask ($assigned_user_id, $task_id, $pdo) {
+        $idUser = $this->getIdUser(); 
+        $resDeligate = $this->makerSqlQuery($pdo, $this->sqlUpdateAsigned, ["$assigned_user_id", "$task_id", "$idUser"]);
+    }
+
+    // метод для удаления задачи 
+    public function delTask ($idTaskDel, $pdo) {
+            $idUser = $this->getIdUser();
+            $this->makerSqlQuery($pdo, $this->sqlDeleteTask, ["$idUser", "$idTaskDel"]);
+    }
+
+    // метод для загрузки делегированный дел 
+    public function showDeligated ($pdo) {
+        $idUser = $this->getIdUser();
+        $resMyBussines = $this->makerSqlQuery($pdo, $this->sqlAllDelegated, ["$idUser", "$idUser"]);
+        return $resMyBussines;
+
+    }
+
+    public function changeStatusTask ($idForTurn, $statusTask, $pdo) {
+        $idUser = $this->getIdUser();
+        $tmpNewStatus = !$statusTask;
+        $this->makerSqlQuery($pdo, $this->sqlUpdateStatusTask, ["$tmpNewStatus", "$idUser", "$idForTurn"]);
+
+    }
+
+    public function showSummTask ($pdo) {
+        $idUser = $this->getIdUser();
+        $resSummTasks = $this->makerSqlQuery($pdo, $this->sqlCountTasks, ["$idUser", "$idUser"])[0]['sum'];
         return $resSummTasks;
     }
 
     public function exitFromAcc () {
-        if(isset($_GET['exitBtn'])) {
-            session_destroy();
-        }
+        session_destroy();
     }
 
     public function getIdUser () {
         if(isset($_SESSION['user_id'])) {
             $idUser = $_SESSION['user_id'];
             return $idUser;
+
         }
     }
 

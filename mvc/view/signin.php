@@ -9,20 +9,20 @@
 </head>
 <body>
     <h1><a href="/">Войдите</a> или <a href="/?controller=form&action=reg&registration=true">зарегистрируйтесь</a> в приложении ToDo</h1>
-    <h2><?=$model->getTitleH2();?><h2>
+    <h2><?=$titleH2; ?><h2>
         <div class="">
             <form role="form">
                 <div class="form-group">
                     <input name="controller" type="hidden" value="base" />
-                    <input name="action" type="hidden" value="<?=$model->getFormAction();?>"/>
+                    <input name="action" type="hidden" value="<?=$FormAction;?>"/>
                     <label for="exampleInputLogin">Логин</label>
-                    <input type="text" name="<?=$model->getLoginName();?>" class="form-control" id="exampleInputLogin" placeholder="<?=$model->getLoginOlaceholder();?>">
+                    <input type="text" name="<?=$LoginName;?>" class="form-control" id="exampleInputLogin" placeholder="<?=$LoginOlaceholder;?>">
                 </div>
                 <div class="form-group">
                     <label for="exampleInputPassword1">Пароль</label>
-                    <input type="password" name="<?=$model->getPassName();?>" class="form-control" id="exampleInputPassword1" placeholder="<?=$model->getPasswordplaceholder();?>">
+                    <input type="password" name="<?=$PassName;?>" class="form-control" id="exampleInputPassword1" placeholder="<?=$Passwordplaceholder;?>">
                 </div>
-                <button type="submit" name="<?=$model->getNameButtonSubmit();?>" class="btn btn-default"><?=$model->getTextButtonSubmit();?></button>
+                <button type="submit" name="<?=$NameButtonSubmit;?>" class="btn btn-default"><?=$TextButtonSubmit;?></button>
             </form>
         </div>
     </body>

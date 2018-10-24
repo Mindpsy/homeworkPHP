@@ -43,7 +43,7 @@
             foreach($resMyBussines as $key => $value):
                 $tmpIdtas = $value['id'];
                 $tmpNowStatus = $value['is_done'];
-                $tmpDirect = $value['is_done'] ? "<a href='/?idForTurn={$tmpIdtas}&statusTask={$tmpNowStatus}&controller=accaunt&action=changeStatus'>Выполнено</a>" : "<a href='/?idForTurn={$tmpIdtas}&statusTask={$tmpNowStatus}&controller=accaunt&action=changeStatus'>Не ыполнено</a>";
+                $tmpDirect = $value['is_done'] ? "<a href='?idForTurn={$tmpIdtas}&statusTask={$tmpNowStatus}&controller=accaunt&action=changeStatus'>Выполнено</a>" : "<a href='?idForTurn={$tmpIdtas}&statusTask={$tmpNowStatus}&controller=accaunt&action=changeStatus'>Не ыполнено</a>";
             ?>
                 <tr>
                     <td><?=$value['description']; ?></td>
