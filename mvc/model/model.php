@@ -7,21 +7,21 @@ ini_set('error_reporting', E_ALL);
 class Model {
 
     // шаблоны запросов для операций с базой 
-    public $sqlLoginIsSet = "SELECT id FROM user WHERE login= ?";
-    public $sqlAddUser = "INSERT INTO user( login, password) VALUES ( ?, ?)";
-    public $sqlLogPassIssSet = "SELECT login FROM user WHERE login=? AND password=?";
-    public $sqlIdForLogin = "SELECT id FROM user WHERE login=?";
-    public $sqlUpdateAsigned = "UPDATE task SET assigned_user_id=? WHERE id=? AND user_id=?";
-    public $sqlMyBussiess = "SELECT id, user_id, assigned_user_id, description, is_done, date_added FROM task WHERE user_id=? ORDER BY date_added";
-    public $sqlLoginForId = "SELECT id, login FROM user WHERE id=?"; 
-    public $sqlAddNewTask = "INSERT INTO task (user_id, assigned_user_id, description, is_done, date_added) VALUES (?, ?, ?, ?, ?)";
-    public $sqlListAllUsers = "SELECT id, login FROM user";
-    public $sqlDeleteTask = "DELETE FROM task WHERE user_id=? AND id=? LIMIT 1";
-    public $sqlAllDelegated = "SELECT user_id as id, assigned_user_id, description, is_done, date_added 
+    public $sqlLoginIsSet = 'SELECT id FROM user WHERE login= ?';
+    public $sqlAddUser = 'INSERT INTO user( login, password) VALUES ( ?, ?)';
+    public $sqlLogPassIssSet = 'SELECT login FROM user WHERE login=? AND password=?';
+    public $sqlIdForLogin = 'SELECT id FROM user WHERE login=?';
+    public $sqlUpdateAsigned = 'UPDATE task SET assigned_user_id=? WHERE id=? AND user_id=?';
+    public $sqlMyBussiess = 'SELECT id, user_id, assigned_user_id, description, is_done, date_added FROM task WHERE user_id=? ORDER BY date_added';
+    public $sqlLoginForId = 'SELECT id, login FROM user WHERE id=?'; 
+    public $sqlAddNewTask = 'INSERT INTO task (user_id, assigned_user_id, description, is_done, date_added) VALUES (?, ?, ?, ?, ?)';
+    public $sqlListAllUsers = 'SELECT id, login FROM user';
+    public $sqlDeleteTask = 'DELETE FROM task WHERE user_id=? AND id=? LIMIT 1';
+    public $sqlAllDelegated = 'SELECT user_id as id, assigned_user_id, description, is_done, date_added 
                         FROM task as t INNER JOIN user as u ON u.id=t.assigned_user_id 
-                            WHERE t.user_id = ? OR t.assigned_user_id = ?";
-    public $sqlUpdateStatusTask = "UPDATE task SET is_done=? WHERE user_id=? AND id=? LIMIT 1";
-    public $sqlCountTasks = "SELECT count(*) as sum FROM task as t WHERE t.user_id = ? OR t.assigned_user_id = ?";
+                            WHERE t.user_id = ? OR t.assigned_user_id = ?';
+    public $sqlUpdateStatusTask = 'UPDATE task SET is_done=? WHERE user_id=? AND id=? LIMIT 1';
+    public $sqlCountTasks = 'SELECT count(*) as sum FROM task as t WHERE t.user_id = ? OR t.assigned_user_id = ?';
     // здесь храним обьект pdo 
     public $pdo;
 
@@ -32,7 +32,7 @@ class Model {
     }
 
     public function getFormAction ($isRegistration) {
-        $action = (empty($isRegistration)) ? "login" : "registration";
+        $action = (empty($isRegistration)) ? 'login' : 'registration';
         return $action;
     }
 
@@ -48,7 +48,7 @@ class Model {
     }
 
     // методы для запросов
-    public function makerSqlQuery ($pdo, $sql, $prePar=[""]) {
+    public function makerSqlQuery ($pdo, $sql, $prePar=['']) {
         // dumper("sql");
         // dumper($sql);
         // dumper("prePar");
@@ -58,7 +58,7 @@ class Model {
             $sth = $pdo->prepare($sql);
             $rres = $sth->execute($prePar);
             if (!$rres) {
-                echo "\nPDO::errorInfo():\n";
+                echo '\nPDO::errorInfo():\n';
                 dumper($sth->errorInfo());
             }
             // dumper("resexecute");
@@ -66,7 +66,7 @@ class Model {
             $res = $sth->fetchAll(PDO::FETCH_ASSOC);
             return $res;
         } catch (PDOException $e) {
-            echo "Ошибка запроса: </br>";
+            echo 'Ошибка запроса: </br>';
             dumper($e);
         }
         
@@ -109,8 +109,8 @@ class Model {
     // метод для добавления новой задачи в базу 
     public function addTask ($newDescription, $pdo) {
         $idUser = $this->getIdUser();
-        $tmpStatusTask = "false";
-        $tmpDate = date("d.m.Y");
+        $tmpStatusTask = '0';
+        $tmpDate = date('d.m.Y');
         $resNewTask = $this->makerSqlQuery($pdo, $this->sqlAddNewTask, ["$idUser", 
                                                             "$idUser", 
                                                             "$newDescription", 
